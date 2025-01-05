@@ -11,7 +11,7 @@ img {
   margin: 0;
   padding: 0;
   cursor:
-    url(static/images/win95_cursor_regular.png) 0 0,
+    url("/static/images/win95_cursor_regular.png") 0 0,
     default;
 }
 
@@ -23,6 +23,7 @@ body {
   color: #ebdbb2;
   display: grid;
   height: 100vh;
+  overflow-x: hidden;
 }
 
 .skipnav {
@@ -218,16 +219,17 @@ canvas {
 #foxy {
   height: 600px;
   width: auto;
-  background: url("static/images/cute.jpg");
+  background: url("/static/images/cute.jpg");
   background-repeat: no-repeat;
 }
 
 #foxy:hover {
-  background: url("static/images/snarl.jpg");
+  background: url("/static/images/snarl.jpg");
   background-repeat: no-repeat;
 }
 
 @keyframes shake {
+
   0%,
   100% {
     transform: translate(0, 0);
@@ -301,6 +303,7 @@ canvas {
 }
 
 @keyframes epilepticFlash {
+
   0%,
   100% {
     background-color: white;
@@ -354,7 +357,7 @@ canvas {
   width: 100%;
 }
 
-#slopTVContainer > a > iframe {
+#slopTVContainer>a>iframe {
   width: 720px;
   height: 790px;
 }
@@ -466,21 +469,19 @@ canvas {
 }
 
 body.wokeMode {
-  background: linear-gradient(
-      #78d8ef 20%,
+  background: linear-gradient(#78d8ef 20%,
       #ffb2ca 20%,
       #ffb2ca 40%,
       #fff 40%,
       #fff 60%,
       #ffb2ca 60%,
       #ffb2ca 80%,
-      #78d8ef 0
-    )
-    fixed !important;
+      #78d8ef 0) fixed !important;
   /* important because i can't bother to disable the code that's putting style="" in body */
 }
 
 @keyframes bob {
+
   0%,
   100% {
     transform: translateY(0);
@@ -519,16 +520,14 @@ body.wokeMode {
   font-family: "Comic Sans MS", sans-serif;
   font-size: 124px;
   text-decoration: none;
-  background: linear-gradient(
-    90deg,
-    red,
-    orange,
-    yellow,
-    green,
-    blue,
-    indigo,
-    violet
-  );
+  background: linear-gradient(90deg,
+      red,
+      orange,
+      yellow,
+      green,
+      blue,
+      indigo,
+      violet);
   background-size: 200% auto;
   background-clip: text;
   -webkit-background-clip: text;
@@ -548,8 +547,7 @@ body.wokeMode {
 @supports (color: oklch(0.75 0.1275 180)) {
   :root {
     --scrollbar-hue: 0;
-    scrollbar-color: oklch(0.5 0.1275 var(--scrollbar-hue))
-      oklch(0.25 0.1275 var(--scrollbar-hue));
+    scrollbar-color: oklch(0.5 0.1275 var(--scrollbar-hue)) oklch(0.25 0.1275 var(--scrollbar-hue));
     animation: scrollbar-hue 15s linear infinite;
   }
 }
@@ -585,30 +583,6 @@ body.wokeMode {
   100% {
     background-position: 0% 50%;
   }
-}
-
-.rainbow-text {
-  font-family: "Comic Sans MS", sans-serif;
-  font-size: 124px;
-  text-decoration: none;
-  background: linear-gradient(
-    90deg,
-    red,
-    orange,
-    yellow,
-    green,
-    blue,
-    indigo,
-    violet
-  );
-  background-size: 200% auto;
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  display: inline-block;
-  font-weight: bold;
-  animation: rainbow 2s linear infinite;
-  cursor: pointer;
 }
 
 #astolfoButton {
@@ -720,6 +694,7 @@ body.wokeMode {
 #ytplayer,
 #ytplayer2,
 #counterWidget,
+#slopTVFrame,
 #soundcloudPlayer {
   border: none;
 }
@@ -729,11 +704,57 @@ body.wokeMode {
 }
 
 .marquee {
-  display: flex;
   overflow: hidden;
+  position: relative;
+  padding-left: 100%;
+  animation: reduce 20s linear infinite;
+}
+
+.marquee__inner {
   white-space: nowrap;
-  box-sizing: border-box;
-  animation: marquee 10s linear infinite;
+  display: inline-block;
+  animation: scroll 20s linear infinite;
+}
+
+.marquee::before,
+.marquee::after {
+  z-index: 1;
+  top: 0;
+  left: 0;
+  position: absolute;
+  width: 50px;
+  height: 100%;
+  content: "";
+  display: block;
+}
+
+.marquee::after {
+  left: auto;
+  right: 0;
+  transform: rotate(180deg);
+}
+
+@keyframes reduce {
+  to {
+    padding-left: 0;
+  }
+}
+
+@keyframes scroll {
+  to {
+    transform: translateX( -100%);
+  }
+}
+
+#slopTVFrame {
+  pointer-events: none;
+}
+
+#slopTVTitle {
+  background-color: white;
+  color: black;
+  font-family: serif;
+  transform: scaleY(1.5);
 }
 
 #slopTVInnerFrame {
@@ -745,34 +766,91 @@ body.wokeMode {
   transform: scaleY(1.5);
 }
 
-@keyframes marquee {
-  from {
-    transform: translateX(100%);
-  }
 
-  to {
-    transform: translateX(-100%);
-  }
-}
-
-#sloptv-overlay {
+#slopTVContainer {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 1;
-  text-decoration: none;
+  top: 800px;
+  left: 100px;
+  transform: scale(0.5);
+  z-index: 2;
+  box-shadow:
+    inset 0.2em 0.2em 0.2em 0 rgba(255, 255, 255, 0.5),
+    inset -0.2em -0.2em 0.2em 0 rgba(0, 0, 0, 0.5);
+  cursor: pointer;
 }
 
-#SlopTVFrame {
-  display: block;
-  z-index: 0;
-  border: none;
+#slopTVContainer>a>iframe {
+  width: 720px;
+  height: 790px;
 }
 
 #gravityButton {
   background-color: red;
   font-family: fantasy;
   font-size: 4em;
+}
+
+#win2k-container {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  width: 600px;
+  height: 400px;
+  z-index: 1050;
+}
+
+#win2k-container .window__body {
+  padding: 0;
+  height: calc(100% - 31px);
+  overflow: hidden
+}
+
+#win2k-container iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+#deslopification button {
+  padding: 10px 20px;
+  background-color: #315f9b;
+  color: #dedede;
+  cursor: pointer;
+  font-size: 16px;
+  border-radius: 5px;
+  transition: all 0.3s ease-in-out;
+  border: 2px solid #315f9b;
+  margin-top: 20px;
+}
+
+#deslopification button:hover {
+  background-color: #507cb7;
+  transform: scale(1.05);
+  border: 2px solid #dedede;
+}
+
+#deslopification {
+  background-color: #282828;
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 1000001;
+  border: 2px solid #dedede;
+  border-radius: 5px;
+  padding: 1.5rem;
+}
+
+.deslopify-checkbox {
+  display: flex;
+  margin: 0;
+  padding: 0;
+  gap: 10px;
+}
+
+.deslopify-button-container {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  margin-top: 20px;
+  gap: 10px;
 }

@@ -1,21 +1,15 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../supabaseClient";
 import Message from "./Message";
+import { sendNotification } from "@tauri-apps/plugin-notification";
 
 const PAGE_SIZE = 50;
 
-export default function MessageList() {
+export default function MessageList(data) {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [hasMore, setHasMore] = useState(true);
   const [scrolling, setScrolling] = useState(false);
-
-  useEffect(() => {
-    const messageBox = document.getElementById("message-box");
-    if (messageBox) {
-      messageBox.scrollTop = messageBox.scrollHeight;
-    }
-  }, [messages]);
 
   useEffect(() => {
     fetchMessages();
@@ -28,8 +22,11 @@ export default function MessageList() {
           const newMessage = payload.new;
           attachDisplayName(newMessage).then((msgWithDisplayName) => {
             setMessages((prev) => [...prev, msgWithDisplayName]);
+            if (data.currentUser && msgWithDisplayName.content.includes(`@${data.currentUser}`)) {
+              triggerNotification(msgWithDisplayName);
+            }
           });
-        },
+        }
       )
       .subscribe();
 
@@ -37,6 +34,13 @@ export default function MessageList() {
       subscription.unsubscribe();
     };
   }, []);
+
+  useEffect(() => {
+    const messageBox = document.getElementById("message-box");
+    if (messageBox) {
+      messageBox.scrollTop = messageBox.scrollHeight;
+    }
+  }, [messages]);
 
   const formatDate = (utcDateString) => {
     const messageDate = new Date(`${utcDateString}Z`);
@@ -75,7 +79,7 @@ export default function MessageList() {
   const attachDisplayName = async (message) => {
     const { data: profile, error } = await supabase
       .from("profiles")
-      .select("display_name, profile_color")
+      .select("display_name, profile_color, profile_photo_url")
       .eq("id", message.user_id)
       .single();
 
@@ -91,6 +95,7 @@ export default function MessageList() {
       ...message,
       display_name: profile.display_name,
       profile_color: profile.profile_color,
+      profile_photo_url: profile.profile_photo_url,
     };
   };
 
@@ -140,6 +145,13 @@ export default function MessageList() {
     }
   };
 
+  const triggerNotification = (message) => {
+    sendNotification({
+      title: `${message.display_name} mentioned you!`,
+      body: message.content,
+    });
+  };
+
   return (
     <div
       id="message-box"
@@ -154,14 +166,15 @@ export default function MessageList() {
         <p>Loading...</p>
       ) : (
         messages.map((msg) => (
-            <Message
-              key={msg.id}
-              name={msg.display_name}
-              color={msg.profile_color}
-              date={formatDate(msg.created_at)}
-              message={msg.content}
-            />
-          ))
+          <Message
+            key={msg.id}
+            name={msg.display_name}
+            color={msg.profile_color}
+            photo={msg.profile_photo_url}
+            date={formatDate(msg.created_at)}
+            message={msg.content}
+          />
+        ))
       )}
     </div>
   );
